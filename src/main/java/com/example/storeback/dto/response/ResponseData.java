@@ -1,13 +1,18 @@
 package com.example.storeback.dto.response;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ResponseData extends BaseResponse{
     private Object data;
+    public ResponseData(String status, String message, Object data) {
+        super(status, message);
+        this.data = data;
+    }
+
+
 
 }

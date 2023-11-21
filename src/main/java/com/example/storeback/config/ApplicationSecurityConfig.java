@@ -61,7 +61,8 @@ public class ApplicationSecurityConfig {
                         .requestMatchers("/api/v1/auth/**")
                         .permitAll()
                         .anyRequest()
-                        .authenticated())
+                        .authenticated()
+                        )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authenticationProvider(authenticationProvider())
                 .exceptionHandling(e->e

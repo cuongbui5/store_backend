@@ -29,7 +29,7 @@ public class JwtService {
                 .toList();
         return JWT.create()
                 .withSubject(userDetails.getUserId().toString())
-                .withExpiresAt(Instant.now().plus(1, ChronoUnit.MINUTES))
+                .withExpiresAt(Instant.now().plus(30, ChronoUnit.MINUTES))
                 .withClaim("email",userDetails.getEmail())
                 .withClaim("authorities",authorities)
                 .sign(Algorithm.HMAC256(jwtProperties.getSecretKey()));

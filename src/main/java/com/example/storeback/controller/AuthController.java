@@ -1,28 +1,16 @@
 package com.example.storeback.controller;
 
-
-import com.example.storeback.config.jwt.JwtService;
 import com.example.storeback.dto.request.LoginRequest;
 import com.example.storeback.dto.request.RefreshTokenRequest;
 import com.example.storeback.dto.request.RegisterRequest;
 import com.example.storeback.dto.response.BaseResponse;
-import com.example.storeback.dto.response.LoginResponse;
-import com.example.storeback.dto.response.ResponseData;
-import com.example.storeback.dto.response.UserResponse;
 import com.example.storeback.service.impl.AuthService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 
 @RestController
