@@ -19,6 +19,9 @@ public class OrderItem extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "product_id",referencedColumnName = "id")
     private Product product;
+    @ManyToOne
+    @JoinColumn(name = "order_id",referencedColumnName = "id")
+    private Order order;
     private Integer quantity;
     private Double totalPrice;
 }

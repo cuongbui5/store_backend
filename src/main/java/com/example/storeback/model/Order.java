@@ -19,6 +19,13 @@ public class Order extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "user_id",referencedColumnName = "id")
     private User user;
-    private Integer total;
+    @ManyToOne
+    @JoinColumn(name = "address_id",referencedColumnName = "id")
+    private Address address;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private OrderStatus status;
+    private Double total;
+
 
 }
