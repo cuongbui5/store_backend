@@ -1,5 +1,6 @@
 package com.example.storeback.model;
 
+import com.example.storeback.model.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,5 +1,6 @@
 package com.example.storeback.model;
 
+import com.example.storeback.model.enums.DiscountType;
 import jakarta.persistence.*;
 import lombok.*;
 
