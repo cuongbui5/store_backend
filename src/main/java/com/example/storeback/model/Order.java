@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "orders")
 @NoArgsConstructor
@@ -25,7 +28,17 @@ public class Order extends BaseEntity{
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private OrderStatus status;
+    @Column(name = "shipping_cost")
+    private Double shippingCost;
     private Double total;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "order_voucher",
+            joinColumns = @JoinColumn(name = "order_id",
+                    referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "voucher_id",
+                    referencedColumnName = "id")
+    )
+    private Set<Voucher> orderVouchers = new HashSet<>();
 
 
 }
