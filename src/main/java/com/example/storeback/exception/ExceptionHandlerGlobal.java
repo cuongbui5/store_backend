@@ -95,6 +95,14 @@ public class ExceptionHandlerGlobal {
         );
     }
 
+    @ExceptionHandler(TokenRefreshException.class)
+    public ResponseEntity<?> handlerTokenRefreshException(TokenRefreshException e){
+        System.out.println(e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                new BaseResponse("fail", e.getMessage())
+        );
+    }
+
 
 
 }

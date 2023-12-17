@@ -14,6 +14,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 @MappedSuperclass
 @Getter

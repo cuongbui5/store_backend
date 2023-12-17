@@ -10,6 +10,7 @@ import com.example.storeback.dto.response.BaseResponse;
 import com.example.storeback.dto.response.LoginResponse;
 import com.example.storeback.exception.AlreadyExistException;
 import com.example.storeback.exception.NotFound;
+import com.example.storeback.exception.TokenRefreshException;
 import com.example.storeback.exception.WrongPassword;
 import com.example.storeback.model.RefreshToken;
 import com.example.storeback.model.Role;
@@ -22,12 +23,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -101,7 +104,7 @@ public class AuthService implements IAuthService {
         if(refreshToken!=null&&refreshTokenService.verifyExpiration(refreshToken)){
             return getLoginResponse(refreshToken.getUser().getUsername());
         }
-        throw new RuntimeException("Not found refresh token!Please login again!");
+        throw new TokenRefreshException("Not found token!Please login again!");
     }
 
     public LoginResponse getLoginResponse(String username) {
@@ -110,11 +113,13 @@ public class AuthService implements IAuthService {
             refreshTokenService.deleteRefreshTokenByUserId(customUserDetails.getUserId());
         }
         RefreshToken refreshToken=refreshTokenService.createRefreshToken(customUserDetails.getUserId());
+        List<String> roles=customUserDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
         return LoginResponse.builder()
                 .accessToken(jwtService.generateToken(customUserDetails))
                 .refreshToken(refreshToken.getToken())
                 .userId(customUserDetails.getUserId())
                 .username(customUserDetails.getUsername())
+                .roles(roles)
                 .build();
     }
 }

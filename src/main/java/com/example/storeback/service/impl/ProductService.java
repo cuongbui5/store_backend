@@ -1,7 +1,11 @@
 package com.example.storeback.service.impl;
 
-import com.example.storeback.dto.obj.Page;
+import com.example.storeback.dto.obj.PageData;
+import com.example.storeback.dto.response.ProductResponse;
+import com.example.storeback.exception.NotFound;
+import com.example.storeback.model.Category;
 import com.example.storeback.model.Product;
+import com.example.storeback.repository.CategoryRepository;
 import com.example.storeback.repository.ProductRepository;
 import com.example.storeback.service.IProductService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -10,6 +14,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,23 +28,26 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductService implements IProductService {
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
     @Override
-    public List<Product> getAll(HttpServletRequest request) {
+    public ProductResponse getAll(HttpServletRequest request) {
         //test:?name=test&page=1&size=3&sort=+price
         String query=request.getQueryString();
+        ProductResponse response=new ProductResponse();
         if(query==null){
-            Page pageData=new Page();
+            PageData pageData=new PageData();
             Pageable pageable = PageRequest.of(pageData.getNum(), pageData.getSize());
-            return productRepository.findAll(pageable).getContent();
+            Page<Product> products = productRepository.findAll(pageable);
+            response.setProducts(products.getContent());
+            response.setTotalPage(products.getTotalPages());
+            response.setPageIndex(pageData.getNum()+1);
+            return response;
         }
-
-
-
         Map<String,String> data=getFilterQuery(query);
         String size = data.get("size");
         String page = data.get("page");
         String field = data.get("sort");
-        Page pageData=new Page();
+        PageData pageData=new PageData();
         if(size!=null){
             pageData.setSize(Integer.parseInt(size));
             data.remove("size");
@@ -55,12 +63,49 @@ public class ProductService implements IProductService {
         Sort sortProduct=sortBy(field);
         Pageable pageable = PageRequest.of(pageData.getNum(), pageData.getSize(), sortProduct);
         Specification<Product> productSpecification=productSpecification(data);
-        return productRepository.findAll(productSpecification, pageable);
+        Page<Product> products = productRepository.findAll(productSpecification, pageable);
+        response.setProducts(products.getContent());
+        response.setTotalPage(products.getTotalPages());
+        response.setPageIndex(pageData.getNum()+1);
+        return response;
     }
 
     @Override
     public Product getProductById(Long productId) {
-        return null;
+        Optional<Product> product= productRepository.findById(productId);
+        if(product.isEmpty()){
+            throw new NotFound("Not found product with id:"+productId);
+        }
+        return product.get();
+    }
+
+    @Override
+    public Product createNewProduct(Product product,Long categoryId) {
+        Optional<Category> category=categoryRepository.findById(categoryId);
+        if(category.isEmpty()){
+            throw new NotFound("Not found category with id:"+categoryId);
+        }
+        product.setCategory(category.get());
+
+        return productRepository.save(product);
+    }
+
+    @Override
+    public Product updateProductById(Long id, Product product) {
+        Product updateProduct=getProductById(id);
+        updateProduct.setName(product.getName());
+        updateProduct.setDescription(product.getDescription());
+        updateProduct.setCategory(product.getCategory());
+        updateProduct.setQuantity(product.getQuantity());
+        updateProduct.setPrice(product.getPrice());
+        updateProduct.setImageCover(product.getImageCover());
+        return productRepository.save(updateProduct);
+    }
+
+    @Override
+    public void deleteProductById(Long id) {
+        productRepository.deleteById(id);
+
     }
 
     public Map<String,String> getFilterQuery(String query){

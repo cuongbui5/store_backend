@@ -11,6 +11,7 @@ import java.util.Collection;
 @Builder
 public class CustomUserDetails implements UserDetails {
     private final Long userId;
+    private final String username;
     private final String email;
     @JsonIgnore
     private final String password;
@@ -31,7 +32,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return username;
     }
 
     @Override

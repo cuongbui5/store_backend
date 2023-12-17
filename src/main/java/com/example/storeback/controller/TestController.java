@@ -14,6 +14,7 @@ public class TestController {
     @GetMapping
     public ResponseEntity<?> test(){
         Random random=new Random();
+        System.out.println("Hello");
 
       return ResponseEntity.ok(new BaseResponse("ok","Test controller!"+ random.nextInt()));
     }

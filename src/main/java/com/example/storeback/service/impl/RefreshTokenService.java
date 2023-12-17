@@ -6,6 +6,7 @@ import com.example.storeback.model.User;
 import com.example.storeback.repository.RefreshTokenRepository;
 import com.example.storeback.repository.UserRepository;
 import com.example.storeback.service.IRefreshTokenService;
+import com.example.storeback.util.Constant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ public class RefreshTokenService implements IRefreshTokenService {
         RefreshToken refreshToken = new RefreshToken();
 
         refreshToken.setUser(userRepository.findById(userId).get());
-        refreshToken.setExpiryDate(Instant.now().plus(2, ChronoUnit.DAYS));
+        refreshToken.setExpiryDate(Instant.now().plus(Constant.REFRESH_TOKEN_EXPIRATION, ChronoUnit.DAYS));
         refreshToken.setToken(UUID.randomUUID().toString());
 
         refreshToken = refreshTokenRepository.save(refreshToken);

@@ -7,10 +7,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class Page {
+public class PageData {
     private int num;
     private int size;
-    public Page(){
+    public PageData(){
         this.num=0;
         this.size=3;
     }

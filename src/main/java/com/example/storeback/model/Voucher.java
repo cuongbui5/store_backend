@@ -17,7 +17,6 @@ public class Voucher extends BaseEntity{
     @Enumerated(EnumType.STRING)
     @Column(name = "discount_type")
     private DiscountType discountType;
-
     @Column(name = "discount_value")
     private Double discountValue;
     private Integer quantity;

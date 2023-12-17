@@ -7,6 +7,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Embeddable
 public class ReviewId implements Serializable {
@@ -17,4 +18,17 @@ public class ReviewId implements Serializable {
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ReviewId reviewId = (ReviewId) o;
+        return Objects.equals(product, reviewId.product) && Objects.equals(user, reviewId.user);
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
+    }
 }

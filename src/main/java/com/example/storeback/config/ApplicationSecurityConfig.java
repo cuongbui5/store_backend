@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,10 +35,8 @@ public class ApplicationSecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
-
         return authProvider;
     }
 
@@ -51,6 +50,8 @@ public class ApplicationSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity  http) throws Exception {
+        String[] apiPrivate={"/api/v1/*/update/**","/api/v1/*/delete/**","/api/v1/*/create/**"};
+
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         http
                 .cors(corsCustomizer -> corsCustomizer
@@ -60,6 +61,8 @@ public class ApplicationSecurityConfig {
                 .authorizeHttpRequests(r->r
                         .requestMatchers("/api/v1/auth/**")
                         .permitAll()
+                        .requestMatchers(apiPrivate)
+                        .hasAuthority("ADMIN")
                         .anyRequest()
                         .authenticated()
                         )
@@ -73,6 +76,7 @@ public class ApplicationSecurityConfig {
         return http.build();
 
     }
+
 
     @Bean
     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
