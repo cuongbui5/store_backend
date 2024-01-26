@@ -8,18 +8,22 @@ import com.example.storeback.model.Product;
 import com.example.storeback.repository.CategoryRepository;
 import com.example.storeback.repository.ProductRepository;
 import com.example.storeback.service.IProductService;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,6 +33,8 @@ import java.util.stream.Collectors;
 public class ProductService implements IProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    @PersistenceContext
+    private EntityManager entityManager;
     @Override
     public ProductResponse getAll(HttpServletRequest request) {
         //test:?name=test&page=1&size=3&sort=+price
@@ -86,6 +92,8 @@ public class ProductService implements IProductService {
             throw new NotFound("Not found category with id:"+categoryId);
         }
         product.setCategory(category.get());
+        product.setReviewTotal(0.0);
+        product.setReviewCount(0);
 
         return productRepository.save(product);
     }
@@ -119,11 +127,13 @@ public class ProductService implements IProductService {
         if (sort == null || sort.isEmpty()) {
             return Sort.unsorted();
         }
-        String field = sort.substring(1);
-        Sort.Order order = Sort.Order.by(field);
+        Sort.Order order ;
         if (sort.startsWith("-")) {
+            String field = sort.substring(1);
+            order= Sort.Order.by(field);
             order = order.with(Sort.Direction.DESC);
         } else {
+            order = Sort.Order.by(sort);
             order = order.with(Sort.Direction.ASC);
         }
 
@@ -140,10 +150,17 @@ public class ProductService implements IProductService {
                     if (key != null && value != null) {
                         try {
                             Double numericValue = Double.parseDouble(value);
-                            predicates.add(builder.equal(root.get(key), numericValue));
+
+                            if ("categoryId".equals(key)) {
+                                Join<Product, Category> categoryJoin = root.join("category", JoinType.INNER);
+                                predicates.add(builder.equal(categoryJoin.get("id"), numericValue));
+                            }else {
+                                predicates.add(builder.equal(root.get(key), numericValue));
+                            }
                         } catch (NumberFormatException e) {
                             String valueIgnoreCase = value.toLowerCase();
                             predicates.add(builder.like(builder.lower(root.get(key)), "%" + valueIgnoreCase.replace("%20"," ") + "%"));
+
                         }
                     }
                 });
@@ -152,5 +169,29 @@ public class ProductService implements IProductService {
 
             return builder.and(predicates.toArray(new Predicate[0]));
         };
+    }
+    @Transactional(propagation = Propagation.NEVER)
+    public void test(){
+        try{
+            SessionImplementor sessionImp = (SessionImplementor) entityManager.getDelegate();
+            var transaction = sessionImp.getTransaction();
+            transaction.begin();
+            CriteriaBuilder builder=entityManager.getCriteriaBuilder();
+            CriteriaQuery<Tuple> cq=builder.createTupleQuery();
+            Root<Product> productRoot=cq.from(Product.class);
+            Join<Product,Category> joinCategory= productRoot.join("category");
+            cq.multiselect(productRoot,joinCategory);
+
+            TypedQuery<Tuple> q= entityManager.createQuery(cq);
+
+            q.getResultStream().forEach(t->{
+                System.out.println(t.get(0).toString()+t.get(1));
+            });
+            transaction.commit();
+
+        }finally {
+            entityManager.close();
+        }
+
     }
 }

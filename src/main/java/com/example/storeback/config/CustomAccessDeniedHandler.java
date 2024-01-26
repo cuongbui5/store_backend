@@ -16,7 +16,7 @@ import java.io.OutputStream;
 @Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
         BaseResponse res = new BaseResponse(HttpStatus.FORBIDDEN.toString(), "you don't have permission to access this resource!");
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);

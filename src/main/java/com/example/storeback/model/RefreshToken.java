@@ -20,7 +20,7 @@ public class RefreshToken extends BaseEntity{
     private Long id;
     private String token;
     private Instant expiryDate;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id",referencedColumnName = "id", nullable = false)
     private User user;
 }

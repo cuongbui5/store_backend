@@ -5,11 +5,15 @@ import com.example.storeback.model.User;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
+@Setter
+@Getter
 public class ReviewId implements Serializable {
     @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "id")

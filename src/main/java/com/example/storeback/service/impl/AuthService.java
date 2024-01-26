@@ -15,6 +15,7 @@ import com.example.storeback.exception.WrongPassword;
 import com.example.storeback.model.RefreshToken;
 import com.example.storeback.model.Role;
 import com.example.storeback.model.User;
+import com.example.storeback.repository.RefreshTokenRepository;
 import com.example.storeback.repository.RoleRepository;
 import com.example.storeback.repository.UserRepository;
 import com.example.storeback.service.IAuthService;
@@ -29,6 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,6 +44,7 @@ public class AuthService implements IAuthService {
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
     private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
 
     @Override
@@ -102,16 +105,20 @@ public class AuthService implements IAuthService {
     public LoginResponse refreshToken(String token) {
         RefreshToken refreshToken=refreshTokenService.getRefreshTokenByToken(token);
         if(refreshToken!=null&&refreshTokenService.verifyExpiration(refreshToken)){
+            refreshToken.setExpiryDate(Instant.now());
+            refreshTokenRepository.save(refreshToken);
             return getLoginResponse(refreshToken.getUser().getUsername());
+        }
+        CustomUserDetails customUserDetails= userDetailsService.loadUserByUsername(refreshToken.getUser().getUsername());
+        if(refreshTokenService.checkExistByUserId(customUserDetails.getUserId())){
+            refreshTokenService.deleteRefreshTokenByUserId(customUserDetails.getUserId());
         }
         throw new TokenRefreshException("Not found token!Please login again!");
     }
 
     public LoginResponse getLoginResponse(String username) {
         CustomUserDetails customUserDetails= userDetailsService.loadUserByUsername(username);
-        if(refreshTokenService.checkExistByUserId(customUserDetails.getUserId())){
-            refreshTokenService.deleteRefreshTokenByUserId(customUserDetails.getUserId());
-        }
+
         RefreshToken refreshToken=refreshTokenService.createRefreshToken(customUserDetails.getUserId());
         List<String> roles=customUserDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
         return LoginResponse.builder()

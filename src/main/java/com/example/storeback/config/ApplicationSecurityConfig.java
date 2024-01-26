@@ -50,7 +50,7 @@ public class ApplicationSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity  http) throws Exception {
-        String[] apiPrivate={"/api/v1/*/update/**","/api/v1/*/delete/**","/api/v1/*/create/**"};
+        String[] apiPrivate={"/api/v1/*/delete/**","/api/v1/*/delete/**","/api/v1/*/create/**"};
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         http

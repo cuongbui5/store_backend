@@ -1,6 +1,6 @@
 package com.example.storeback.model.pk;
 
-import com.example.storeback.model.Address;
+
 import com.example.storeback.model.User;
 import com.example.storeback.model.Voucher;
 import jakarta.persistence.Embeddable;

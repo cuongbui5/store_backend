@@ -24,4 +24,6 @@ public class CartItem extends BaseEntity{
   private Cart cart;
   private Integer quantity;
   private Double totalPrice;
+
+
 }

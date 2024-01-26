@@ -23,11 +23,9 @@ public class RefreshTokenService implements IRefreshTokenService {
     @Override
     public RefreshToken createRefreshToken(Long userId) {
         RefreshToken refreshToken = new RefreshToken();
-
         refreshToken.setUser(userRepository.findById(userId).get());
-        refreshToken.setExpiryDate(Instant.now().plus(Constant.REFRESH_TOKEN_EXPIRATION, ChronoUnit.DAYS));
+        refreshToken.setExpiryDate(Instant.now().plus(Constant.REFRESH_TOKEN_EXPIRATION, ChronoUnit.MINUTES));
         refreshToken.setToken(UUID.randomUUID().toString());
-
         refreshToken = refreshTokenRepository.save(refreshToken);
         return refreshToken;
     }
@@ -51,6 +49,8 @@ public class RefreshTokenService implements IRefreshTokenService {
         }
         return true;
     }
+
+
 
     @Override
     public boolean checkExistByUserId(Long userId) {
